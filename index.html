@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Typer Story | Official Website</title>
-    <link rel="icon" href="https://img2.pic.in.th/typernewgene9e6cf13412eab28.md.png" type="image/png">
     
+    <link rel="icon" href="https://img2.pic.in.th/typernewgene9e6cf13412eab28.md.png" type="image/png">
+
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         :root {
             --primary-blue: #00f2ff;
@@ -17,6 +19,7 @@
             --deep-blue: #060b1a;
             --card-bg: rgba(10, 20, 50, 0.8);
             --card-hover: rgba(16, 32, 77, 0.9);
+            --text-glow: 0 0 15px rgba(0, 242, 255, 0.6);
             --accent-blue-gradient: linear-gradient(135deg, #00f2ff 0%, #0077ff 100%);
             --accent-gold: #ffcf4d;
             --accent-green: #2ecc71;
@@ -29,6 +32,7 @@
             background-color: var(--deep-blue);
             color: white;
             overflow-x: hidden;
+            position: relative;
             min-height: 100vh;
         }
 
@@ -67,8 +71,8 @@
 
         .nav-links a {
             text-decoration: none; color: #8892b0; font-weight: 500;
-            padding: 10px 24px; border-radius: 30px; transition: 0.3s;
-            font-size: 0.95rem;
+            padding: 10px 24px; border-radius: 30px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem; letter-spacing: 0.5px;
         }
 
         .nav-links a:hover { color: var(--primary-blue); background: rgba(0, 242, 255, 0.05); }
@@ -77,7 +81,7 @@
         .nav-actions { display: flex; gap: 15px; align-items: center; }
 
         .btn {
-            border: none; cursor: pointer; font-weight: 600; transition: 0.3s;
+            border: none; cursor: pointer; font-weight: 600; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; align-items: center; justify-content: center; outline: none;
         }
 
@@ -86,15 +90,22 @@
             background: rgba(0, 242, 255, 0.08); color: var(--primary-blue);
             font-size: 1.2rem; border: 1px solid rgba(0, 242, 255, 0.2);
         }
-        .btn-icon:hover { background: var(--primary-blue); color: var(--deep-blue); transform: translateY(-3px); }
+
+        .btn-icon:hover {
+            background: var(--primary-blue); color: var(--deep-blue);
+            transform: translateY(-3px); box-shadow: 0 5px 20px rgba(0, 242, 255, 0.4);
+        }
 
         .btn-login {
             padding: 12px 28px; border-radius: 14px;
             background: var(--accent-blue-gradient); color: white;
             font-size: 1rem; gap: 10px; box-shadow: 0 4px 15px rgba(0, 119, 255, 0.3);
+            position: relative; overflow: hidden;
         }
+
         .btn-login:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5); }
 
+        /* User Profile in Nav */
         .user-nav-profile { display: flex; align-items: center; gap: 15px; }
         .user-nav-info { text-align: right; line-height: 1.2; }
         .user-nav-name { font-weight: 700; font-size: 0.95rem; color: white; }
@@ -111,90 +122,176 @@
             width: 100%; margin-bottom: 60px; border-radius: 30px; overflow: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: 1px solid rgba(0, 242, 255, 0.1);
         }
+
         .hero-img { width: 100%; height: auto; max-height: 550px; object-fit: cover; display: block; }
 
         .section-header { text-align: center; margin-bottom: 60px; }
+
         .section-title {
             font-size: 3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px;
-            background: linear-gradient(to right, #fff, var(--primary-blue));
+            margin-bottom: 15px; background: linear-gradient(to right, #fff, var(--primary-blue));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
         }
-        .section-subtitle { color: #64748b; font-size: 1.2rem; font-weight: 300; margin-top: 10px; }
+
+        .section-subtitle { color: #64748b; font-size: 1.2rem; font-weight: 300; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; }
+
         .stat-card {
             background: var(--card-bg); border-radius: 24px; padding: 45px 25px; text-align: center;
-            border: 1px solid rgba(0, 242, 255, 0.1); backdrop-filter: blur(15px); transition: 0.4s;
+            border: 1px solid rgba(0, 242, 255, 0.1); backdrop-filter: blur(15px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .stat-card:hover { transform: translateY(-12px); border-color: var(--primary-blue); }
+
+        .stat-card:hover {
+            background: var(--card-hover); border-color: var(--primary-blue);
+            transform: translateY(-12px); box-shadow: 0 20px 45px rgba(0, 242, 255, 0.2);
+        }
+
         .stat-icon-bg {
             width: 80px; height: 80px; background: rgba(0, 242, 255, 0.1); border-radius: 22px;
             display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;
-            color: var(--primary-blue); font-size: 2.2rem;
+            color: var(--primary-blue); font-size: 2.2rem; transition: 0.4s;
         }
-        .stat-number { font-size: 3.5rem; font-weight: 800; color: #fff; }
-        .stat-unit { font-size: 1.2rem; color: var(--primary-blue); margin-left: 6px; }
+        
+        .stat-card:hover .stat-icon-bg {
+            background: var(--primary-blue); color: var(--deep-blue);
+            box-shadow: 0 0 35px var(--primary-blue); transform: scale(1.1) rotate(5deg);
+        }
+
+        .stat-number { font-size: 3.5rem; font-weight: 800; color: #fff; line-height: 1; }
+        .stat-unit { font-size: 1.2rem; color: var(--primary-blue); margin-left: 6px; font-weight: 500; }
+        .stat-label { color: #8892b0; margin-top: 12px; font-size: 1.1rem; letter-spacing: 1px; }
 
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 35px; }
+
         .product-card {
             background: var(--card-bg); border-radius: 24px; overflow: hidden;
             border: 1px solid rgba(255,255,255,0.05); transition: 0.4s; backdrop-filter: blur(10px);
         }
-        .product-card:hover { transform: translateY(-10px); border-color: var(--primary-blue); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+
+        .product-card:hover {
+            transform: translateY(-10px); border-color: var(--primary-blue);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
         .product-img { width: 100%; height: 230px; position: relative; overflow: hidden; }
         .product-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s; }
         .product-card:hover .product-img img { transform: scale(1.15); }
+
         .product-badge {
             position: absolute; top: 20px; right: 20px; background: var(--accent-blue-gradient);
             color: white; padding: 6px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 119, 255, 0.4); z-index: 2;
         }
+
         .product-info { padding: 30px; }
-        .product-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: white; }
-        .product-desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; }
+        .product-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: white; letter-spacing: 0.5px; }
+        .product-desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; min-height: 50px; }
+
         .product-footer { display: flex; justify-content: space-between; align-items: center; }
-        .product-price { font-size: 1.7rem; font-weight: 800; color: var(--accent-gold); }
+        .product-price {
+            font-size: 1.7rem; font-weight: 800; color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(255, 207, 77, 0.2);
+        }
+
         .btn-buy {
             background: var(--accent-blue-gradient); color: white; padding: 12px 26px;
-            border-radius: 14px; font-size: 1rem; border: none; cursor: pointer; transition: 0.3s;
+            border-radius: 14px; font-size: 1rem; box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3);
+            border: none; cursor: pointer; transition: 0.3s;
         }
-        .btn-buy:hover { transform: scale(1.05); }
 
-        .topup-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5); }
+
+        .topup-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 60px; }
+
         .method-card {
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 20px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s;
         }
+
         .method-card.active, .method-card:hover {
             background: rgba(0, 242, 255, 0.1); border-color: var(--primary-blue);
-            transform: translateY(-8px);
+            transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 242, 255, 0.15);
         }
+
         .method-card i { font-size: 2.5rem; margin-bottom: 18px; color: var(--primary-blue); }
-        
-        .topup-form-container { display: none; background: var(--card-bg); padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1); }
-        .topup-form-container.active { display: block; animation: fadeInUp 0.5s ease; }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 10px; color: #8892b0; }
-        .form-control {
-            width: 100%; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; transition: 0.3s;
-        }
-        .form-control:focus { border-color: var(--primary-blue); }
-        .btn-submit {
-            width: 100%; padding: 15px; background: var(--accent-green); color: #060b1a;
-            font-weight: 800; border: none; border-radius: 12px; font-size: 1.1rem; cursor: pointer; margin-top: 10px;
-        }
-        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); }
 
+        /* Modified for Backend Forms */
+        .topup-input-container {
+            max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 40px;
+            border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        
+        .topup-input-container.active { display: block; animation: fadeInUp 0.5s ease; }
+        
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .hidden { display: none !important; }
 
-        @media (max-width: 900px) { .nav-links { display: none; } }
+        .form-group { margin-bottom: 25px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 12px; color: #8892b0; font-weight: 500; }
+        
+        .form-control {
+            width: 100%; padding: 16px; border-radius: 12px; background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+
+        .btn-confirm {
+            width: 100%; padding: 16px; background: var(--accent-green); color: #060b1a;
+            font-weight: 800; border: none; border-radius: 12px; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .btn-confirm:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); }
+
+        .qr-display { text-align: center; margin-bottom: 30px; }
+        .qr-display img { width: 250px; border-radius: 15px; border: 8px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        .faq-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .faq-item { background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; transition: 0.3s; }
+        .faq-header { padding: 28px 35px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 500; font-size: 1.2rem; }
+        .faq-header:hover { background: rgba(0, 242, 255, 0.05); }
+        .faq-content { max-height: 0; overflow: hidden; padding: 0 35px; color: #94a3b8; font-size: 1.05rem; line-height: 1.9; transition: 0.5s ease-out; }
+        .faq-item.active .faq-content { max-height: 300px; padding-bottom: 30px; }
+        .faq-item.active .faq-header i { transform: rotate(180deg); }
+
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        .team-card {
+            background: var(--card-bg); border-radius: 35px; padding: 55px 35px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.08); position: relative; transition: 0.4s;
+        }
+        .team-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: var(--accent-blue-gradient); }
+        .team-card:hover { transform: translateY(-15px); border-color: var(--primary-blue); box-shadow: 0 25px 55px rgba(0,0,0,0.5); }
+        .team-avatar {
+            width: 150px; height: 150px; border-radius: 45px; margin: 0 auto 35px;
+            border: 4px solid var(--primary-blue); padding: 10px; transform: rotate(-3deg);
+            transition: 0.4s; background: rgba(0, 242, 255, 0.05);
+        }
+        .team-card:hover .team-avatar { transform: rotate(0deg) scale(1.08); box-shadow: 0 0 30px rgba(0, 242, 255, 0.3); }
+        .team-avatar img { width: 100%; height: 100%; border-radius: 35px; object-fit: cover; }
+        .team-name { font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 10px; }
+        .team-role {
+            color: var(--primary-blue); font-size: 1rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 30px; background: rgba(0, 242, 255, 0.1);
+            display: inline-block; padding: 8px 22px; border-radius: 45px;
+        }
+        .team-socials { display: flex; justify-content: center; gap: 20px; }
+        .social-link {
+            width: 50px; height: 50px; border-radius: 15px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; color: #fff;
+            text-decoration: none; transition: 0.3s; font-size: 1.3rem; border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .social-link:hover { background: var(--primary-blue); color: var(--deep-blue); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4); }
+
+        @media (max-width: 1100px) { nav { padding: 0 30px; } .nav-links { display: none; } }
+        @media (max-width: 768px) { .section-title { font-size: 2.5rem; } .hero-img { height: 320px; } nav { padding: 0 20px; } }
     </style>
 </head>
 <body>
+
+<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 
 <div class="bg-pattern"></div>
 <div class="bg-overlay"></div>
@@ -211,10 +308,10 @@
         <a href="#" class="nav-item" data-target="team">ทีมงาน</a>
     </div>
     <div class="nav-actions" id="auth-section">
-        <button class="btn btn-icon" onclick="window.open('https://discord.gg/typestory', '_blank')">
+        <button class="btn btn-icon sound-trigger" onclick="window.open('https://discord.gg/typestory', '_blank')">
             <i class="fa-brands fa-discord"></i>
         </button>
-        <button class="btn btn-login" onclick="window.location.href='/auth/discord'">
+        <button class="btn btn-login sound-trigger" onclick="window.location.href='/auth/discord'">
             <i class="fa-solid fa-user-astronaut"></i> เข้าสู่ระบบ
         </button>
     </div>
@@ -226,29 +323,31 @@
             <header class="hero-section">
                 <img src="https://i.postimg.cc/C1McbDhQ/1865-45D982F.png" alt="Hero Banner" class="hero-img">
             </header>
+
             <div class="section-header">
                 <h2 class="section-title">สถิติเซิร์ฟเวอร์</h2>
                 <p class="section-subtitle">ข้อมูลการให้บริการล่าสุดในขณะนี้</p>
             </div>
+            
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card sound-trigger">
                     <div class="stat-icon-bg"><i class="fa-solid fa-tower-broadcast"></i></div>
-                    <div class="stat-number">312<span class="stat-unit">คน</span></div>
+                    <div class="stat-number"><span data-target="312">0</span><span class="stat-unit">คน</span></div>
                     <div class="stat-label">กำลังออนไลน์</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card sound-trigger">
                     <div class="stat-icon-bg"><i class="fa-solid fa-gem"></i></div>
-                    <div class="stat-number">156<span class="stat-unit">ชิ้น</span></div>
+                    <div class="stat-number"><span data-target="156">0</span><span class="stat-unit">ชิ้น</span></div>
                     <div class="stat-label">สินค้าทั้งหมด</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card sound-trigger">
                     <div class="stat-icon-bg"><i class="fa-solid fa-cart-shopping"></i></div>
-                    <div class="stat-number">1,240<span class="stat-unit">ครั้ง</span></div>
+                    <div class="stat-number"><span data-target="1240">0</span><span class="stat-unit">ครั้ง</span></div>
                     <div class="stat-label">ยอดขายวันนี้</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card sound-trigger">
                     <div class="stat-icon-bg"><i class="fa-solid fa-users-viewfinder"></i></div>
-                    <div class="stat-number">32k<span class="stat-unit">คน</span></div>
+                    <div class="stat-number"><span data-target="32800">0</span><span class="stat-unit">คน</span></div>
                     <div class="stat-label">สมาชิกทั้งหมด</div>
                 </div>
             </div>
@@ -262,21 +361,21 @@
                 <p class="section-subtitle">เลือกซื้อสินค้าสุดพิเศษเพื่อยกระดับการเล่นของคุณ</p>
             </div>
             <div class="product-grid">
-                <div class="product-card">
+                <div class="product-card sound-trigger">
                     <div class="product-img">
                         <img src="https://cdn.discordapp.com/attachments/1454544545307033760/1468284642908962836/unwatermarked_1000019011.png" alt="Item">
                         <div class="product-badge">NEW PACK</div>
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">FAT SHARK!</h3>
-                        <p class="product-desc">รถบินพิเศษ มีเอฟเฟคน้ำ มีเสียงเอฟเฟคตอนขึ้นและลงรถ!</p>
+                        <p class="product-desc">รถบินพิเศษ มีเอฟเฟคน้ำ มีเสียงเอฟเฟคตอนขึ้นและลงรถ! เท่ไม่เหมือนใคร</p>
                         <div class="product-footer">
                             <span class="product-price">400 P</span>
-                            <button class="btn-buy" onclick="buyItem('FAT SHARK!', 400)">สั่งซื้อ</button>
+                            <button class="btn btn-buy" onclick="buyItem('FAT SHARK!', 400)">สั่งซื้อ</button>
                         </div>
                     </div>
                 </div>
-                <div class="product-card">
+                <div class="product-card sound-trigger">
                     <div class="product-img">
                         <img src="https://via.placeholder.com/400x300/0077ff/ffffff?text=VIP+SET" alt="Item">
                         <div class="product-badge">HOT</div>
@@ -286,7 +385,7 @@
                         <p class="product-desc">เซตเริ่มต้นสำหรับผู้เล่นใหม่ ได้รับสิทธิพิเศษมากมาย</p>
                         <div class="product-footer">
                             <span class="product-price">300 P</span>
-                            <button class="btn-buy" onclick="buyItem('VIP STARTER', 300)">สั่งซื้อ</button>
+                            <button class="btn btn-buy" onclick="buyItem('VIP STARTER', 300)">สั่งซื้อ</button>
                         </div>
                     </div>
                 </div>
@@ -298,45 +397,47 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">เติมเครดิต</h2>
-                <p class="section-subtitle">ระบบอัตโนมัติ รวดเร็ว ปลอดภัย</p>
+                <p class="section-subtitle">รองรับการเติมเงินหลากหลายช่องทาง สะดวก รวดเร็ว</p>
             </div>
             <div class="topup-methods">
-                <div class="method-card active" onclick="switchMethod('truemoney', this)">
+                <div class="method-card active sound-trigger" onclick="switchMethod('truemoney', this)">
                     <i class="fa-solid fa-envelope-open-text"></i>
                     <p>ซองของขวัญ (TrueMoney)</p>
                 </div>
-                <div class="method-card" onclick="switchMethod('qrcode', this)">
+                <div class="method-card sound-trigger" onclick="switchMethod('qrcode', this)">
                     <i class="fa-solid fa-qrcode"></i>
                     <p>สแกน QR Code (PromptPay)</p>
                 </div>
             </div>
-            <div id="form-truemoney" class="topup-form-container active">
-                <h3 style="text-align:center; margin-bottom:20px; color:var(--primary-blue);">กรอกลิงก์ซองของขวัญ</h3>
+
+            <div id="form-truemoney" class="topup-input-container active">
+                <h3 style="text-align:center; margin-bottom:30px; color:var(--primary-blue); font-size:1.8rem;">กรอกลิงก์ซองของขวัญ</h3>
                 <div class="form-group">
-                    <label class="form-label">ลิงก์ซองของขวัญ</label>
+                    <label>ลิงก์ซองของขวัญ</label>
                     <input type="text" id="giftLink" class="form-control" placeholder="https://gift.truemoney.com/campaign/?v=...">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">เบอร์โทรศัพท์ (ถ้ามี)</label>
+                    <label>เบอร์โทรศัพท์ (ถ้ามี)</label>
                     <input type="text" id="phone" class="form-control" placeholder="08xxxxxxxx">
                 </div>
-                <button class="btn-submit" onclick="submitTrueMoney()">ยืนยันการเติมเงิน</button>
+                <button class="btn-confirm sound-trigger" onclick="submitTrueMoney()">ยืนยันการเติมเงิน</button>
             </div>
-            <div id="form-qrcode" class="topup-form-container">
-                <h3 style="text-align:center; margin-bottom:20px; color:var(--primary-blue);">สแกน QR Code เพื่อชำระเงิน</h3>
-                <div style="text-align:center; margin-bottom:20px;">
-                    <img src="https://promptpay.io/0123456789.png" style="width:200px; border-radius:15px; border:5px solid white;">
-                    <p style="margin-top:10px; color:#aaa;">ชื่อบัญชี: Typer Story Official</p>
+
+            <div id="form-qrcode" class="topup-input-container">
+                <h3 style="text-align:center; margin-bottom:30px; color:var(--primary-blue); font-size:1.8rem;">สแกน QR Code เพื่อชำระเงิน</h3>
+                <div class="qr-display">
+                    <img src="https://promptpay.io/0123456789.png" alt="QR Code">
+                    <p style="margin-top:15px; color:#aaa; font-size:1.1rem;">ชื่อบัญชี: Typer Story Official</p>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">จำนวนเงินที่โอน</label>
-                    <input type="number" id="slipAmount" class="form-control" placeholder="ระบุจำนวนเงิน">
+                    <label>จำนวนเงินที่โอน</label>
+                    <input type="number" id="slipAmount" class="form-control" placeholder="ระบุจำนวนเงินที่โอน">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">อัปโหลดสลิป</label>
+                    <label>อัปโหลดสลิปการโอนเงิน</label>
                     <input type="file" id="slipFile" class="form-control" accept="image/*">
                 </div>
-                <button class="btn-submit" onclick="submitSlip()">แจ้งโอนเงิน</button>
+                <button class="btn-confirm sound-trigger" onclick="submitSlip()">แจ้งโอนเงิน</button>
             </div>
         </div>
     </section>
@@ -345,13 +446,32 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">ช่วยเหลือ</h2>
-                <p class="section-subtitle">คำถามที่พบบ่อยและการแก้ไขปัญหา</p>
+                <p class="section-subtitle">ตอบข้อสงสัยและแก้ไขปัญหาเบื้องต้นสำหรับคุณ</p>
             </div>
-            <div style="max-width:800px; margin:0 auto; display:flex; flex-direction:column; gap:15px;">
-                <div style="background:var(--card-bg); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1);">
-                    <h3><i class="fa-solid fa-circle-question" style="color:var(--primary-blue);"></i> เติมเงินแล้วพอยท์ไม่เข้า?</h3>
-                    <p style="color:#aaa; margin-top:10px;">กรุณาติดต่อทีมงานผ่าน Discord พร้อมแนบหลักฐาน</p>
+            <div class="faq-container">
+                <div class="faq-item sound-trigger">
+                    <div class="faq-header">
+                        <span>วิธีการซื้อสินค้าในเว็ปไซต์?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        เข้าสู่ระบบ > เติมเครดิตให้เพียงพอ > เลือกสินค้าที่ต้องการ > กดสั่งซื้อ > รอรับไอเทมในเกมได้ทันทีผ่านระบบคลังแสง
+                    </div>
                 </div>
+                <div class="faq-item sound-trigger">
+                    <div class="faq-header">
+                        <span>หากพบปัญหาในเกมต้องทำอย่างไร?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        ท่านสามารถติดต่อทีมงานเพื่อแจ้งปัญหาได้ตลอด 24 ชั่วโมง ผ่านทาง Discord Official ของเซิร์ฟเวอร์
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 60px;">
+                <button class="btn btn-login sound-trigger" onclick="window.open('https://discord.gg/typestory', '_blank')" style="padding: 18px 50px; font-size: 1.2rem;">
+                    <i class="fa-brands fa-discord"></i> ติดต่อผ่าน Discord
+                </button>
             </div>
         </div>
     </section>
@@ -360,18 +480,30 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">ทีมงาน</h2>
-                <p class="section-subtitle">ผู้พัฒนาและดูแลระบบ</p>
+                <p class="section-subtitle">ทีมงานผู้ดูแลและพัฒนาระบบ Typer Story</p>
             </div>
-            <div class="stats-grid" style="justify-content: center;">
-                <div class="stat-card">
-                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary-blue); margin-bottom:20px;">
-                    <h3>TyperMaster</h3>
-                    <p style="color:var(--primary-blue);">Owner & Developer</p>
+            <div class="team-grid">
+                <div class="team-card sound-trigger">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=300" alt="Admin">
+                    </div>
+                    <h3 class="team-name">TyperMaster</h3>
+                    <div class="team-role">Founder & Lead Dev</div>
+                    <div class="team-socials">
+                        <a href="https://discord.gg/typestory" target="_blank" class="social-link"><i class="fa-brands fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fa-brands fa-facebook-f"></i></a>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&h=150" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--primary-blue); margin-bottom:20px;">
-                    <h3>AdminSupport</h3>
-                    <p style="color:var(--primary-blue);">Community Manager</p>
+                <div class="team-card sound-trigger">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=300" alt="Admin">
+                    </div>
+                    <h3 class="team-name">ZeedDeveloper</h3>
+                    <div class="team-role">System Infrastructure</div>
+                    <div class="team-socials">
+                        <a href="https://discord.gg/typestory" target="_blank" class="social-link"><i class="fa-brands fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fa-brands fa-github"></i></a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -379,32 +511,27 @@
 </main>
 
 <script>
-    let userData = null;
+    // --- Audio System ---
+    const clickSound = document.getElementById('clickSound');
+    const hoverSound = document.getElementById('hoverSound');
+    hoverSound.volume = 0.15;
+    clickSound.volume = 0.4;
 
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            navItems.forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-            const target = item.getAttribute('data-target');
-            document.querySelectorAll('.page-section').forEach(sec => {
-                sec.classList.remove('active-section');
-                sec.style.opacity = 0;
-                if(sec.id === target) {
-                    sec.classList.add('active-section');
-                    gsap.to(sec, { opacity: 1, duration: 0.5, y: 0, startAt: {y: 20} });
-                }
+    function initAudio() {
+        document.querySelectorAll('.sound-trigger, .nav-item, .btn, .method-card, .faq-header, .product-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                hoverSound.currentTime = 0;
+                hoverSound.play().catch(() => {});
+            });
+            el.addEventListener('click', () => {
+                clickSound.currentTime = 0;
+                clickSound.play().catch(() => {});
             });
         });
-    });
-
-    function switchMethod(method, el) {
-        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-        document.querySelectorAll('.topup-form-container').forEach(f => f.classList.remove('active'));
-        document.getElementById(`form-${method}`).classList.add('active');
     }
+
+    // --- Backend Integration Logic ---
+    let userData = null;
 
     async function checkLogin() {
         try {
@@ -412,8 +539,12 @@
             if (res.ok) {
                 userData = await res.json();
                 renderAuthSection(true);
-            } else { renderAuthSection(false); }
-        } catch (e) { renderAuthSection(false); }
+            } else {
+                renderAuthSection(false);
+            }
+        } catch (e) {
+            renderAuthSection(false);
+        }
     }
 
     function renderAuthSection(isLoggedIn) {
@@ -426,74 +557,188 @@
                         <div class="user-nav-points">${userData.points.toLocaleString()} Points</div>
                     </div>
                     <img src="https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png" class="user-nav-avatar">
-                    <button class="btn btn-icon" style="background:#ef4444; border-color:#ef4444; width:35px; height:35px; color:white;" onclick="window.location.href='/logout'">
+                    <button class="btn btn-icon sound-trigger" style="background:#ef4444; border-color:#ef4444; width:35px; height:35px; color:white;" onclick="window.location.href='/logout'">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
             `;
         } else {
             container.innerHTML = `
-                <button class="btn btn-icon" onclick="window.open('https://discord.gg/typestory', '_blank')">
+                <button class="btn btn-icon sound-trigger" onclick="window.open('https://discord.gg/typestory', '_blank')">
                     <i class="fa-brands fa-discord"></i>
                 </button>
-                <button class="btn btn-login" onclick="window.location.href='/auth/discord'">
+                <button class="btn btn-login sound-trigger" onclick="window.location.href='/auth/discord'">
                     <i class="fa-solid fa-user-astronaut"></i> เข้าสู่ระบบ
                 </button>
             `;
         }
+        initAudio(); // Re-bind audio to new elements
     }
 
-    async function buyItem(itemName, price) {
-        if (!userData) return Swal.fire('แจ้งเตือน', 'กรุณาเข้าสู่ระบบก่อนสั่งซื้อ', 'warning');
-        if (userData.points < price) return Swal.fire('ยอดเงินไม่พอ', 'กรุณาเติมเงิน', 'error');
-        Swal.fire({
-            title: 'ยืนยันการสั่งซื้อ?', text: `ต้องการซื้อ ${itemName} ราคา ${price} Points`, icon: 'question',
-            showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) Swal.fire('สำเร็จ!', 'ทำรายการเรียบร้อยแล้ว ของรางวัลถูกส่งเข้าตัวละคร', 'success');
-        });
+    function switchMethod(method, el) {
+        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('.topup-input-container').forEach(f => f.classList.remove('active'));
+        document.getElementById(`form-${method}`).classList.add('active');
     }
 
     async function submitTrueMoney() {
         if (!userData) return Swal.fire('แจ้งเตือน', 'กรุณาเข้าสู่ระบบก่อน', 'warning');
         const link = document.getElementById('giftLink').value;
         const phone = document.getElementById('phone').value;
+
         if (!link) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกลิงก์ซองของขวัญ', 'error');
+
         Swal.fire({ title: 'กำลังตรวจสอบ...', didOpen: () => Swal.showLoading() });
+
         try {
             const res = await fetch('/api/topup/truemoney', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link, phone })
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ link, phone })
             });
             const data = await res.json();
-            if (data.success) { Swal.fire('เติมเงินสำเร็จ', `ได้รับ ${data.amount} Points`, 'success').then(() => location.reload()); }
-            else { Swal.fire('ล้มเหลว', data.message || 'เกิดข้อผิดพลาด', 'error'); }
-        } catch (e) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+            
+            if (data.success) {
+                Swal.fire('เติมเงินสำเร็จ', `ได้รับ ${data.amount} Points`, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('ล้มเหลว', data.message || 'เกิดข้อผิดพลาด', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+        }
     }
 
     async function submitSlip() {
         if (!userData) return Swal.fire('แจ้งเตือน', 'กรุณาเข้าสู่ระบบก่อน', 'warning');
         const amount = document.getElementById('slipAmount').value;
         const file = document.getElementById('slipFile').files[0];
+
         if (!amount || !file) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุจำนวนเงินและแนบสลิป', 'error');
+
         const formData = new FormData();
         formData.append('amount', amount);
         formData.append('slip', file);
+
         Swal.fire({ title: 'กำลังตรวจสอบหลักฐาน...', didOpen: () => Swal.showLoading() });
+
         try {
-            const res = await fetch('/api/topup/slip', { method: 'POST', body: formData });
+            const res = await fetch('/api/topup/slip', {
+                method: 'POST',
+                body: formData
+            });
             const data = await res.json();
-            if (data.success) { Swal.fire('แจ้งโอนสำเร็จ', `ระบบกำลังตรวจสอบยอด ${data.amount} บาท`, 'success').then(() => location.reload()); }
-            else { Swal.fire('ล้มเหลว', 'เกิดข้อผิดพลาดในการอัปโหลด', 'error'); }
-        } catch (e) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+
+            if (data.success) {
+                Swal.fire('แจ้งโอนสำเร็จ', `ระบบกำลังตรวจสอบยอด ${data.amount} บาท`, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('ล้มเหลว', 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+        }
     }
+
+    async function buyItem(itemName, price) {
+        if (!userData) return Swal.fire('แจ้งเตือน', 'กรุณาเข้าสู่ระบบก่อนสั่งซื้อ', 'warning');
+        if (userData.points < price) return Swal.fire('ยอดเงินไม่พอ', 'กรุณาเติมเงิน', 'error');
+
+        Swal.fire({
+            title: 'ยืนยันการสั่งซื้อ?',
+            text: `ต้องการซื้อ ${itemName} ราคา ${price} Points`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('สำเร็จ!', 'ทำรายการเรียบร้อยแล้ว ของรางวัลถูกส่งเข้าตัวละคร', 'success');
+            }
+        });
+    }
+
+    // --- Page Animations & Interactions ---
+    function runStats() {
+        document.querySelectorAll('.stat-number span[data-target]').forEach(num => {
+            const target = +num.getAttribute('data-target');
+            gsap.to(num, {
+                innerText: target,
+                duration: 2.5,
+                snap: { innerText: 1 },
+                ease: "power3.out",
+                onUpdate: function() {
+                    num.innerHTML = Math.ceil(this.targets()[0].innerText).toLocaleString();
+                }
+            });
+        });
+    }
+
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = item.getAttribute('data-target');
+            
+            if (item.classList.contains('active')) return;
+
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+
+            const current = document.querySelector('.page-section.active-section');
+            const next = document.getElementById(targetId);
+
+            gsap.to(current, {
+                opacity: 0,
+                y: -30,
+                duration: 0.4,
+                onComplete: () => {
+                    current.classList.remove('active-section');
+                    next.classList.add('active-section');
+                    gsap.fromTo(next, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+                    
+                    if (targetId === 'home') runStats();
+                    if (targetId === 'products') gsap.from(".product-card", { opacity: 0, scale: 0.9, stagger: 0.1, duration: 0.5 });
+                    if (targetId === 'topup') gsap.from(".method-card, .topup-input-container", { opacity: 0, y: 20, stagger: 0.1 });
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.faq-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const wasActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            if (!wasActive) item.classList.add('active');
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        const moveX = (e.clientX - window.innerWidth / 2) * 0.015;
+        const moveY = (e.clientY - window.innerHeight / 2) * 0.015;
+        gsap.to(".bg-pattern", { x: moveX, y: moveY, duration: 2.5, ease: "power1.out" });
+    });
+
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('nav');
+        if (window.scrollY > 60) {
+            nav.style.height = '80px';
+            nav.style.background = 'rgba(6, 11, 26, 0.98)';
+            nav.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        } else {
+            nav.style.height = '90px';
+            nav.style.background = 'var(--nav-bg)';
+            nav.style.boxShadow = 'none';
+        }
+    });
 
     window.addEventListener('load', () => {
         checkLogin();
-        gsap.from("nav", { y: -100, opacity: 0, duration: 1, ease: "power4.out" });
-        gsap.from(".hero-section", { scale: 0.9, opacity: 0, duration: 1, delay: 0.3 });
-        gsap.from(".stat-card", { y: 50, opacity: 0, stagger: 0.1, delay: 0.5 });
+        gsap.from("nav", { y: -100, opacity: 0, duration: 1.2, ease: "power4.out" });
+        gsap.from(".hero-section", { scale: 0.95, opacity: 0, duration: 1.5, delay: 0.4, ease: "expo.out" });
+        initAudio();
+        runStats();
     });
 </script>
-
 </body>
 </html>
