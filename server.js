@@ -4,49 +4,82 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const multer = require('multer');
-const path = require('path');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
-const axios = require('axios');
+const path = require('path');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Mock Database (Replace with MongoDB/MySQL in production)
-const users = {}; 
+// --- CONFIG ---
+const USERS_DB_FILE = './users_db.json';
+if (!fs.existsSync(USERS_DB_FILE)) fs.writeFileSync(USERS_DB_FILE, JSON.stringify({}));
 
-// Setup Passport
+function getUser(id) {
+    const data = JSON.parse(fs.readFileSync(USERS_DB_FILE));
+    return data[id];
+}
+
+function saveUser(user) {
+    const data = JSON.parse(fs.readFileSync(USERS_DB_FILE));
+    data[user.id] = user;
+    fs.writeFileSync(USERS_DB_FILE, JSON.stringify(data, null, 2));
+}
+
+// --- DISCORD BOT ---
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+client.once('ready', () => {
+    console.log(`Bot Active: ${client.user.tag}`);
+});
+
+client.login(process.env.DISCORD_TOKEN);
+
+async function sendLog(userId, title, desc, color = 0x00f2ff) {
+    try {
+        const channel = await client.channels.fetch(process.env.LOG_CHANNEL_ID);
+        const embed = new EmbedBuilder()
+            .setTitle(title)
+            .setDescription(desc)
+            .setColor(color)
+            .setTimestamp()
+            .setFooter({ text: `User ID: ${userId}` });
+        if(channel) channel.send({ embeds: [embed] });
+    } catch(e) { console.error('Bot Log Error:', e); }
+}
+
+// --- EXPRESS SERVER ---
+app.use(express.static('public'));
+app.use(express.json());
+app.use(session({ secret: 'super-secret', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
-    if (!users[id]) users[id] = { id, username: 'User', credits: 0 };
-    done(null, users[id]);
+    const user = getUser(id);
+    done(null, user);
 });
 
 passport.use(new DiscordStrategy({
-    clientID: process.env.DISCORD_CLIENT_ID,
-    clientSecret: process.env.DISCORD_CLIENT_SECRET,
-    callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds']
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: process.env.CALLBACK_URL,
+    scope: ['identify', 'email']
 }, (accessToken, refreshToken, profile, done) => {
-    if (!users[profile.id]) {
-        users[profile.id] = {
+    let user = getUser(profile.id);
+    if (!user) {
+        user = {
             id: profile.id,
             username: profile.username,
             avatar: profile.avatar,
-            credits: 0,
-            discriminator: profile.discriminator
+            points: 0,
+            joinedAt: new Date()
         };
+        saveUser(user);
     }
-    return done(null, users[profile.id]);
+    return done(null, user);
 }));
-
-app.use(express.json());
-app.use(express.static('public'));
-app.use(session({
-    secret: 'typerstory_secret_key',
-    resave: false,
-    saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Routes
 app.get('/auth/discord', passport.authenticate('discord'));
@@ -54,71 +87,44 @@ app.get('/auth/discord/callback', passport.authenticate('discord', {
     failureRedirect: '/'
 }), (req, res) => res.redirect('/'));
 
-app.get('/logout', (req, res) => {
-    req.logout(() => res.redirect('/'));
-});
-
 app.get('/api/user', (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not logged in' });
-    res.json(req.user);
+    if (req.isAuthenticated()) res.json(req.user);
+    else res.status(401).send();
 });
 
-// TrueMoney Gift Link Redemption (Mock Logic)
+// Topup: TrueMoney Angpao
 app.post('/api/topup/truemoney', async (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const { link, phone } = req.body;
+    if (!req.user) return res.status(401).json({ success: false, message: 'Login required' });
+    const { link } = req.body;
 
-    // NOTE: Real implementation requires a library like 'truewallet-voucher'
-    // or external API service. This is a simulation.
-    console.log(`Processing link: ${link} for user ${req.user.username}`);
-    
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 1500));
-
-    // Simple validation logic
-    if (link.includes('gift.truemoney.com')) {
-        const amount = Math.floor(Math.random() * 100) + 20; // Simulated amount
-        users[req.user.id].credits += amount;
+    // Simulation Only (Put real API Logic here)
+    if (link.includes('truemoney.com')) {
+        const amount = 50; // Simulated Amount
+        req.user.points += amount;
+        saveUser(req.user);
         
-        // Notify via Webhook or Bot
-        sendBotLog(req.user.id, `Topup TrueMoney: ${amount} THB`);
+        sendLog(req.user.id, '💰 เติมเงินสำเร็จ (ซองของขวัญ)', `User: ${req.user.username}\nAmount: ${amount} THB\nLink: ${link}`, 0x2ecc71);
         
-        res.json({ success: true, amount });
-    } else {
-        res.json({ success: false, message: 'ลิงก์ซองของขวัญไม่ถูกต้อง' });
+        return res.json({ success: true, amount });
     }
+    
+    res.json({ success: false, message: 'ลิงก์ไม่ถูกต้อง' });
 });
 
-// Slip Verification (Mock Logic using OpenSlip/EasySlip pattern)
+// Topup: Slip
 const upload = multer({ dest: 'uploads/' });
-app.post('/api/topup/slip', upload.single('slip'), async (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    if (!req.file) return res.json({ success: false, message: 'No file uploaded' });
-
+app.post('/api/topup/slip', upload.single('slip'), (req, res) => {
+    if (!req.user) return res.status(401).json({ success: false });
+    
+    // Simulation (Put Real OCR/Bank API here)
     const amount = parseFloat(req.body.amount);
+    req.user.points += amount;
+    saveUser(req.user);
     
-    // NOTE: In production, send fs.createReadStream(req.file.path) to Slip Verification API
-    // e.g., axios.post('https://api.openslip.com/verify', formData, headers...)
+    sendLog(req.user.id, '📄 เติมเงินสำเร็จ (สลิป)', `User: ${req.user.username}\nAmount: ${amount} THB`, 0x2ecc71);
     
-    console.log(`Verifying slip for ${req.user.username}, amount: ${amount}`);
-    
-    // Simulate Verification Success
-    await new Promise(r => setTimeout(r, 2000));
-    
-    // Cleanup file
-    fs.unlinkSync(req.file.path);
-
-    users[req.user.id].credits += amount;
-    sendBotLog(req.user.id, `Topup Slip: ${amount} THB`);
-
+    fs.unlinkSync(req.file.path); // Delete temp file
     res.json({ success: true, amount });
 });
 
-// Helper to communicate with Bot
-function sendBotLog(userId, message) {
-    // Ideally use an Event Emitter or direct import if in same process
-    // For this script, we assume bot.js runs separately or we integrate here.
-    // See bot.js integration below.
-}
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
