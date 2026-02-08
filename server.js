@@ -11,7 +11,6 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- CONFIG ---
 const USERS_DB_FILE = './users_db.json';
 if (!fs.existsSync(USERS_DB_FILE)) fs.writeFileSync(USERS_DB_FILE, JSON.stringify({}));
 
@@ -26,32 +25,23 @@ function saveUser(user) {
     fs.writeFileSync(USERS_DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// --- DISCORD BOT ---
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-client.once('ready', () => {
-    console.log(`Bot Active: ${client.user.tag}`);
-});
-
+client.once('ready', () => console.log(`Bot Active: ${client.user.tag}`));
 client.login(process.env.DISCORD_TOKEN);
 
 async function sendLog(userId, title, desc, color = 0x00f2ff) {
     try {
         const channel = await client.channels.fetch(process.env.LOG_CHANNEL_ID);
-        const embed = new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(desc)
-            .setColor(color)
-            .setTimestamp()
-            .setFooter({ text: `User ID: ${userId}` });
-        if(channel) channel.send({ embeds: [embed] });
-    } catch(e) { console.error('Bot Log Error:', e); }
+        if(channel) {
+            const embed = new EmbedBuilder().setTitle(title).setDescription(desc).setColor(color).setTimestamp().setFooter({ text: `ID: ${userId}` });
+            channel.send({ embeds: [embed] });
+        }
+    } catch(e) { console.error("Log Error:", e); }
 }
 
-// --- EXPRESS SERVER ---
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-app.use(session({ secret: 'super-secret', resave: false, saveUninitialized: false }));
+app.use(session({ secret: 'typerstory_secure_key', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -69,62 +59,51 @@ passport.use(new DiscordStrategy({
 }, (accessToken, refreshToken, profile, done) => {
     let user = getUser(profile.id);
     if (!user) {
-        user = {
-            id: profile.id,
-            username: profile.username,
-            avatar: profile.avatar,
-            points: 0,
-            joinedAt: new Date()
-        };
+        user = { id: profile.id, username: profile.username, avatar: profile.avatar, points: 0 };
         saveUser(user);
     }
     return done(null, user);
 }));
 
-// Routes
 app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback', passport.authenticate('discord', {
-    failureRedirect: '/'
-}), (req, res) => res.redirect('/'));
+app.get('/auth/discord/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => res.redirect('/'));
 
 app.get('/api/user', (req, res) => {
     if (req.isAuthenticated()) res.json(req.user);
     else res.status(401).send();
 });
 
-// Topup: TrueMoney Angpao
-app.post('/api/topup/truemoney', async (req, res) => {
-    if (!req.user) return res.status(401).json({ success: false, message: 'Login required' });
-    const { link } = req.body;
-
-    // Simulation Only (Put real API Logic here)
-    if (link.includes('truemoney.com')) {
-        const amount = 50; // Simulated Amount
-        req.user.points += amount;
-        saveUser(req.user);
-        
-        sendLog(req.user.id, '💰 เติมเงินสำเร็จ (ซองของขวัญ)', `User: ${req.user.username}\nAmount: ${amount} THB\nLink: ${link}`, 0x2ecc71);
-        
-        return res.json({ success: true, amount });
-    }
-    
-    res.json({ success: false, message: 'ลิงก์ไม่ถูกต้อง' });
+app.get('/logout', (req, res) => {
+    req.logout(() => res.redirect('/'));
 });
 
-// Topup: Slip
+app.post('/api/topup/truemoney', async (req, res) => {
+    if (!req.user) return res.status(401).json({ success: false });
+    const { link, phone } = req.body;
+    
+    // Simulate Check
+    if (link.includes('gift.truemoney.com')) {
+        const amount = Math.floor(Math.random() * 90) + 10;
+        req.user.points += amount;
+        saveUser(req.user);
+        sendLog(req.user.id, 'Topup Success (Angpao)', `User: ${req.user.username}\nAmount: ${amount} THB\nLink: ${link}`, 0x2ecc71);
+        return res.json({ success: true, amount });
+    }
+    res.json({ success: false, message: 'Invalid Gift Link' });
+});
+
 const upload = multer({ dest: 'uploads/' });
 app.post('/api/topup/slip', upload.single('slip'), (req, res) => {
     if (!req.user) return res.status(401).json({ success: false });
-    
-    // Simulation (Put Real OCR/Bank API here)
     const amount = parseFloat(req.body.amount);
+    
+    // Simulate Slip Verification
     req.user.points += amount;
     saveUser(req.user);
+    sendLog(req.user.id, 'Topup Slip Uploaded', `User: ${req.user.username}\nClaimed Amount: ${amount}`, 0x3498db);
     
-    sendLog(req.user.id, '📄 เติมเงินสำเร็จ (สลิป)', `User: ${req.user.username}\nAmount: ${amount} THB`, 0x2ecc71);
-    
-    fs.unlinkSync(req.file.path); // Delete temp file
+    if(req.file) fs.unlinkSync(req.file.path);
     res.json({ success: true, amount });
 });
 
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server is running! Access via domain: https://typerstory.xyz (or http://localhost:${PORT} for testing)`));
